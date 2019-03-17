@@ -13,9 +13,3 @@ trait OrderRepository[F[_]] {
   def delete(orderId: String): F[Option[Order]]
 
 }
-
-object OrderRepository {
-
-  def apply[F[_]: OrderRepository]: OrderRepository[F] = implicitly[OrderRepository[F]]
-
-}

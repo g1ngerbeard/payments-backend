@@ -7,7 +7,23 @@ import cats.implicits._
 import me.payments.core.model.OrderStatus.PaymentSubmitted
 import me.payments.core.model.{ CardData, Item, Order, OrderStatus }
 
-class OrderService[F[_]: Monad](repo: OrderRepository[F], paymentsService: PaymentsService[F]) {
+/**
+  * Service for placing, updating and submitting of orders. This is the entry point to the payment core
+  */
+trait OrderService[F[_]] {
+
+  def get(orderId: String): F[Option[Order]]
+
+  def create(items: Vector[Item]): F[Order]
+
+  def updateItems(orderId: String, items: Vector[Item]): F[Option[Order]]
+
+  def submitPayment(orderId: String, cardData: CardData): F[Option[Order]]
+
+}
+
+class DefaultOrderService[F[_]: Monad](repo: OrderRepository[F], paymentProcessor: PaymentsProcessor[F])
+    extends OrderService[F] {
 
   def get(orderId: String): F[Option[Order]] = repo.find(orderId)
 
@@ -28,7 +44,7 @@ class OrderService[F[_]: Monad](repo: OrderRepository[F], paymentsService: Payme
 
   private def processPayment(cardData: CardData)(order: Order): F[Order] =
     for {
-      status       <- paymentsService.submitPayment(order, cardData)
+      status       <- paymentProcessor.submitPayment(order, cardData)
       updatedOrder <- repo.createOrUpdate(order.updated(orderStatus = PaymentSubmitted(status)))
     } yield updatedOrder
 

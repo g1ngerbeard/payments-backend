@@ -14,10 +14,17 @@ object model {
     case object AmericanExpress extends PaymentSystem
   }
 
+  sealed trait EligibilityResult
+
+  object EligibilityResult {
+    case object Eligible                   extends EligibilityResult
+    case class NonEligible(reason: String) extends EligibilityResult
+  }
+
   sealed trait PaymentResult
 
   object PaymentResult {
-    case object Accepted extends PaymentResult
+    case object Accepted                extends PaymentResult
     case class Rejected(reason: String) extends PaymentResult
   }
 

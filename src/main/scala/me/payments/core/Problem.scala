@@ -2,7 +2,7 @@ package me.payments.core
 
 import me.payments.core.model.PaymentSystem
 
-trait Problem extends Throwable {
+trait Problem {
 
   val message: String
 

@@ -3,11 +3,10 @@ package me.payments.core.interpreters
 import java.util.concurrent.ConcurrentHashMap
 
 import me.payments.core.OrderRepository
-import me.payments.core.Problem.{ ProblemOr, StorageFailure }
-import me.payments.core.interpreters.MockUtil.isSuccessfulCall
-import me.payments.core.model.{ Item, Order }
+import me.payments.core.Problem.{ProblemOr, StorageFailure}
+import me.payments.core.model.{Item, Order}
 
-class InmemOrderRepository(failRate: Double = 0.0) extends OrderRepository[ProblemOr] {
+class InmemOrderRepository(failOnCall: Boolean = false) extends OrderRepository[ProblemOr] {
 
   private val orders = new ConcurrentHashMap[String, Order]()
 
@@ -30,6 +29,6 @@ class InmemOrderRepository(failRate: Double = 0.0) extends OrderRepository[Probl
     }
 
   private def doCall[T](call: => T): ProblemOr[T] =
-    Either.cond(isSuccessfulCall(failRate), call, StorageFailure("this is mocked failure"))
+    Either.cond(!failOnCall, call, StorageFailure("this is mocked failure"))
 
 }
